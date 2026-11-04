@@ -21,7 +21,8 @@ Escribe una consulta para obtener el nombre del departamento, su director, su fe
 
 Solución:
 ```sql
-
+SELECT nombre, director, fechaIngresoDirector as fecha, max(strftime("%m", fechaIngresoDirector)) as mes
+FROM departamento
 ```
 
 Tabla resultado:
@@ -170,7 +171,10 @@ Tabla resultado:
 Escribe una consulta que devuelva el nombre de cada proyecto (nombre_proyecto) y el total de horas trabajadas en cada uno (total_horas_dedicadas), ordena los resultados por las horas trabajabas empezando por el de mayor horas. 
 
 ```sql
-
+SELECT p.nombre as nombre_proyecto, sum(t.horas) as total_horas_dedicadas
+FROM PROYECTO p FULL OUTER JOIN TRABAJA_EN t ON p.numero = t.proyecto
+GROUP BY numero
+ORDER by total_horas_dedicadas DESC
 ```
 
 Tabla resultado:
@@ -260,7 +264,11 @@ Escribe una consulta que devuelva el nombre (nombre_empleado) y apellido1 de emp
 Solución:
 
 ```sql
-
+SELECT e.nombre as nombre_empleado, e.apellido1, p.nombre as nombre_proyecto, p.ubicacion
+FROM EMPLEADO e 
+INNER JOIN TRABAJA_EN t ON t.empleado = e.dni 
+INNER JOIN PROYECTO p ON t.proyecto = p.numero
+ORDER by nombre_empleado
 ```
 
 Tabla resultado:
@@ -486,7 +494,17 @@ INSERT INTO Proyecto VALUES ('ProductoGTP',6,'Madrid',5);
 
 Solución:
 ```sql
+INSERT INTO Proyecto VALUES ('ProductoGTP',6,'Madrid',5);
+SELECT 
+	p.nombre as nombre_proyecto,
+	e.nombre as nombre_empleado,
+	t.horas
+	
+FROM PROYECTO p
+LEFT OUTER JOIN TRABAJA_EN t ON p.numero = t.proyecto
+LEFT OUTER JOIN EMPLEADO e ON t.empleado = e.dni
 
+ORDER BY nombre_proyecto, nombre_empleado
 ```
 
 Tabla resultado:
@@ -617,7 +635,13 @@ Obtener un listado con el nombre completo de los empleados que **NO** tienen nin
 
 Solución:
 ```sql
-
+SELECT 
+    e.nombre,
+    e.apellido1,
+    e.apellido2
+FROM EMPLEADO e
+LEFT JOIN FAMILIAR f ON e.dni = f.empleado
+WHERE f.empleado IS NULL;
 ```
 
 Tabla resultado:
@@ -787,7 +811,15 @@ Escribe una consulta que devuelva para cada departamento su nombre (nombre_depar
 Solución:
 
 ```sql
-
+SELECT 
+    d.nombre AS nombre_departamento,
+    COUNT(DISTINCT p.numero) AS num_proyectos,
+    COALESCE(SUM(t.horas), 0) AS total_horas_dedicadas
+FROM DEPARTAMENTO d
+LEFT JOIN PROYECTO p ON d.numero = p.dpto
+LEFT JOIN TRABAJA_EN t ON p.numero = t.proyecto
+GROUP BY d.numero, d.nombre
+ORDER BY total_horas_dedicadas DESC;
 ```
 
 Tabla resultado:

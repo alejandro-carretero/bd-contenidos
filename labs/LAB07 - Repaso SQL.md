@@ -26,7 +26,13 @@ Escribe una consulta que muestre el nombre, apellido1 y sueldo de los empleados 
 
 Solución:
 ```sql
+SELECT nombre, apellido1, sueldo
 
+FROM EMPLEADO
+
+WHERE (sueldo BETWEEN 25000 AND 40000) AND (nombre LIKE 'J%' OR nombre LIKE 'A%')
+
+ORDER BY sueldo desc, nombre
 ```
 
 **Tabla resultado:**
@@ -52,7 +58,12 @@ Escribe una consulta que muestre, para cada departamento, el número de empleado
 
 Solución:
 ```sql
+SELECT D.numero as dpto, COUNT(E.nombre) as num_empleados, SUM(E.sueldo) as sueldo_total
 
+FROM DEPARTAMENTO D JOIN EMPLEADO E ON D.numero = E.dpto
+
+GROUP BY D.nombre HAVING num_empleados > 1
+ORDER BY sueldo_total desc;
 ```
 
 **Tabla resultado:**
@@ -76,7 +87,14 @@ Escribe una consulta que muestre el nombre y apellido1 del empleado, el nombre d
 
 Solución:
 ```sql
+SELECT E.nombre as nombre_empleado, E.apellido1, P.nombre as nombre_proyecto, D.nombre as nombre_departamento
 
+FROM EMPLEADO E JOIN TRABAJA_EN T ON E.dni = T.empleado
+	JOIN PROYECTO P ON T.proyecto = P.numero
+	JOIN DEPARTAMENTO D ON P.dpto = D.numero
+
+WHERE E.apellido1 LIKE 'P%'
+ORDER BY E.nombre;
 ```
 
 **Tabla resultado:**
@@ -106,16 +124,26 @@ Ordena por número de empleados descendente.
 
 Solución:
 ```sql
-
+SELECT 
+	case
+	  when sueldo < 30000 then 'Junior'
+	  when sueldo between 30000 AND 45000 then 'Senior'
+	  when sueldo > 45000 then 'Executive'
+	end as categoria_salarial,
+	count(*) as num_empleados
+	
+FROM EMPLEADO 
+GROUP BY categoria_salarial
+ORDER BY num_empleados desc;
 ```
 
 **Tabla resultado:**
 
-| categoria_salarial | num_empleados | 
-| ------------------ | ------------- |
-| Senior             | 4             |
-| Junior             | 3             |
-| Executive          | 1             |
+| categoria_salarial | num_empleados |     |
+| ------------------ | ------------- | --- |
+| Senior             | 4             |     |
+| Junior             | 3             |     |
+| Executive          | 1             |     |
 
 ---
 
@@ -136,7 +164,16 @@ Ordena por total de horas descendente y, luego, alfabéticamente por apellido y 
 
 Solución:
 ```sql
+WITH horas_empleado as (
+  SELECT empleado, SUM(T.horas) as total_horas
+  FROM TRABAJA_EN T
+  GROUP BY T.empleado
+)
 
+SELECT nombre, apellido1, total_horas
+FROM EMPLEADO inner join horas_empleado on dni=empleado
+WHERE total_horas > 30
+ORDER BY total_horas desc, apellido1, nombre;
 ```
 
 **Tabla resultado:**
@@ -165,7 +202,15 @@ Escribe una consulta que muestre el nombre de los departamentos que tienen al me
 
 Solución:
 ```sql
+SELECT D.nombre as nombre_departamento
 
+FROM DEPARTAMENTO D
+WHERE EXISTS(
+  SELECT 1
+  FROM EMPLEADO E INNER JOIN TRABAJA_EN T ON E.dni=T.empleado
+  WHERE E.dpto = D.numero
+  GROUP BY E.dni HAVING COUNT(T.proyecto) > 1
+);
 ```
 
 **Tabla resultado:**

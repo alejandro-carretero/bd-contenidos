@@ -27,7 +27,10 @@ Escribe una consulta que utilice un filtro para calcular simultáneamente el nú
 
 Solución:
 ```sql
-
+SELECT
+    round(AVG(CASE WHEN reproducciones > 100000000 THEN reproducciones END), 2) AS media_exitos,
+    round(AVG(CASE WHEN reproducciones < 1000000 THEN reproducciones END), 2) AS media_minoritarias
+FROM cancion;
 ```
 
 Resultado:
@@ -189,7 +192,26 @@ $FAMILIAR$(empleado, nombre, sexo, fechaNac, relación\*)
 
 Solución:
 ```sql
+CREATE TABLE FAMILIAR (
+	empleado TEXT NOT NULL,
+	nombre TEXT NOT NULL,
+	sexo TEXT NOT NULL,
+	fechaNac TEXT NOT NULL,
+	relacion TEXT
+) STRICT;
 
+INSERT INTO familiar (empleado, nombre, sexo, fechanac, relacion) VALUES
+('333445555', 'Alicia', 'F', '1986-04-06', 'Hija'),
+('333445555', 'Teodoro', 'M', '1983-10-25', 'Hijo'),
+('333445555', 'Luisa', 'F', '1958-05-03', 'Esposa'),
+('987654321', 'Alfonso', 'M', '1942-02-28', 'Esposo'),
+('123456789', 'Miguel', 'M', '1988-01-04', 'Hijo'),
+('123456789', 'Alice', 'F', '1988-12-30', 'Hija'),
+('123456789', 'Elisa', 'F', '1967-05-05', 'Esposa');
+
+SELECT *
+FROM FAMILIAR
+WHERE SEXO='M';
 ```
 
 Tabla resultado:
@@ -247,7 +269,20 @@ Reescribe la definición de la tabla de `FAMILIAR` para agregar las siguientes r
 
 Solución
 ```sql
+drop table if exists familiar;
 
+CREATE TABLE FAMILIAR (
+	empleado TEXT NOT NULL,
+	nombre TEXT NOT NULL,
+	sexo TEXT NOT NULL CHECK (sexo IN('M', 'F', 'O')),
+	fechaNac TEXT NOT NULL,
+	relacion TEXT CHECK (relacion IN('Hijo', 'Hija', 'Conyuge', 'Hermano', 'Hermana'))
+) STRICT;
+
+SELECT 
+    Lower(tbl_name) as name, 
+    Lower(REPLACE(REPLACE(REPLACE(REPLACE(sql, ' ', ''), CHAR(9), ''), CHAR(10), ''), CHAR(13), '')) as sql
+from sqlite_schema where type='table' and Lower(name)='familiar';
 ```
 
 Para verificar tu respuesta, selecciona su definición de la tabla sqlite_schema mediante la siguiente consulta:
@@ -433,7 +468,26 @@ En caso de ser una sola columna, crea una restricción a nivel de columna.
 
 Solución:
 ```sql
+-- borra tabla empleado
+drop table if exists empleado;
 
+CREATE TABLE EMPLEADO (	
+	nombre TEXT NOT NULL,
+	apellido1 TEXT NOT NULL,
+	apellido2 TEXT,
+	dni TEXT PRIMARY KEY NOT NULL,
+	fechaNac TEXT NOT NULL,
+	direccion TEXT,
+	sexo TEXT NOT NULL,
+	sueldo REAL NOT NULL,
+	supervisor TEXT,
+	dpto INTEGER NOT NULL
+) STRICT;
+
+SELECT 
+    Lower(tbl_name) as name, 
+    Lower(REPLACE(REPLACE(REPLACE(REPLACE(sql, ' ', ''), CHAR(9), ''), CHAR(10), ''), CHAR(13), '')) as sql
+from sqlite_schema where type='table' and Lower(name)='empleado';
 ```
 
 Para verificar tu respuesta, selecciona su definición de la tabla sqlite_schema mediante la siguiente consulta:
@@ -447,9 +501,9 @@ from sqlite_schema where type='table' and Lower(name)='empleado';
 
 Tabla resultado:
 
-| name     | sql                                                                                                                                                                                                            | 
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| empleado | createtableempleado(nombretextnotnull,apellido1textnotnull,apellido2text,dnitextprimarykeynotnull,fechanactextnotnull,direcciontext,sexotextnotnull,sueldorealnotnull,supervisortext,dptointegernotnull)strict |
+| name     | sql                                                                                                                                                                                                            |     |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| empleado | createtableempleado(nombretextnotnull,apellido1textnotnull,apellido2text,dnitextprimarykeynotnull,fechanactextnotnull,direcciontext,sexotextnotnull,sueldorealnotnull,supervisortext,dptointegernotnull)strict |     |
 
 ---
 ## Clave externa: motivación
@@ -704,7 +758,22 @@ Reescribe la definición de la tabla de `FAMILIAR` para agregar su clave primari
 
 Solución
 ```sql
+drop table if exists familiar;
 
+CREATE TABLE FAMILIAR (
+	empleado TEXT NOT NULL,
+	nombre TEXT NOT NULL,
+	sexo TEXT NOT NULL CHECK (sexo IN('M', 'F', 'O')),
+	fechaNac TEXT NOT NULL,
+	relacion TEXT CHECK (relacion IN('Hijo', 'Hija', 'Conyuge', 'Hermano', 'Hermana')),
+  	PRIMARY KEY (empleado, nombre),
+  	FOREIGN KEY (empleado) REFERENCES EMPLEADO (dni) ON UPDATE CASCADE ON DELETE CASCADE
+) STRICT;
+
+SELECT 
+    Lower(tbl_name) as name, 
+    Lower(REPLACE(REPLACE(REPLACE(REPLACE(sql, ' ', ''), CHAR(9), ''), CHAR(10), ''), CHAR(13), '')) as sql
+from sqlite_schema where type='table' and Lower(name)='familiar';
 ```
 
 Para verificar tu respuesta, selecciona su definición de la tabla sqlite_schema mediante la siguiente consulta:
@@ -858,7 +927,24 @@ Elimina la columna `valoracion` de la tabla `UBICACION`  (anteriormente, `LOCALI
 
 Solución:
 ```sql
+CREATE TABLE IF NOT EXISTS LOCALIZACIONES_DPTO (
+    dpto INTEGER NOT NULL,
+    ubicacion TEXT NOT NULL,
+    PRIMARY KEY (dpto, ubicacion) -- PRIMARY KEY implica NOT NULL
+) STRICT;
 
+-- añadir una nueva columna a una tabla
+ALTER TABLE localizaciones_dpto
+ADD valoracion integer not null default 0 check (valoracion > -1 and valoracion <6);
+
+ALTER TABLE LOCALIZACIONES_DPTO rename to UBICACION;
+
+ALTER TABLE UBICACION DROP COLUMN valoracion;
+
+SELECT 
+    Lower(tbl_name) as name, 
+    Lower(REPLACE(REPLACE(REPLACE(REPLACE(sql, ' ', ''), CHAR(9), ''), CHAR(10), ''), CHAR(13), '')) as sql
+from sqlite_schema where type='table' and Lower(name)='ubicacion';
 ```
 
 Para verificar tu respuesta, selecciona su definición de la tabla sqlite_schema mediante la siguiente consulta:
@@ -936,15 +1022,7 @@ Abre en otra pestaña [SQL Snippets con la base de datos de streaming](https://i
 Solución:
 
 ```sql
--- crear vista
-CREATE VIEW media_reproducciones_por_genero_idioma AS
-SELECT genero, idioma, round(AVG(reproducciones), 2) AS media_reproducciones
-FROM cancion
-WHERE idioma IS NOT NULL
-GROUP BY genero, idioma;
 
--- usar vista
-select * from media_reproducciones_por_genero_idioma;
 ```
 
 Tabla resultado:

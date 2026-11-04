@@ -770,7 +770,19 @@ Escribe una consulta que devuelva los proyectos del departamento con mayor núme
 
 Solución:
 ```sql
-
+with depto_mas_empleados as (
+    select dpto
+    from empleado
+    group by dpto
+    order by count(*) desc
+    limit 1
+)
+select 
+    p.nombre,
+    p.ubicacion,
+    p.dpto
+from proyecto p
+where p.dpto = (select dpto from depto_mas_empleados);
 ```
 
 Tabla resultado:
