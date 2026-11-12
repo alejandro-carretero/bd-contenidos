@@ -1,4 +1,4 @@
-- 1 fallo grave supone un 0 en la pregunta
+ - 1 fallo grave supone un 0 en la pregunta
 - 2 fallos medios suponen un 0 en la pregunta
 - 1 fallo medio y varios fallos leves pueden supone un 0 en la pregunta
 

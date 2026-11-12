@@ -672,16 +672,16 @@ SELECT nombre, apellido1, sueldo FROM EMPLEADO;
 
 Tabla resultado:
 
-| nombre   | apellido1 | sueldo | 
-| -------- | --------- | ------ |
-| José     | Pérez     | 36000  |
-| Alberto  | Campos    | 48000  |
-| Alicia   | Jiménez   | 30000  |
-| Juana    | Sáinz     | 43000  |
-| Fernando | Ojeda     | 45600  |
-| Aurora   | Oliva     | 30000  |
-| Luis     | Pajares   | 30000  |
-| Eduardo  | Ochoa     | 55000  |
+| nombre   | apellido1 | sueldo |     |
+| -------- | --------- | ------ | --- |
+| José     | Pérez     | 36000  |     |
+| Alberto  | Campos    | 48000  |     |
+| Alicia   | Jiménez   | 30000  |     |
+| Juana    | Sáinz     | 43000  |     |
+| Fernando | Ojeda     | 45600  |     |
+| Aurora   | Oliva     | 30000  |     |
+| Luis     | Pajares   | 30000  |     |
+| Eduardo  | Ochoa     | 55000  |     |
 
 ---
 ## Operadores típicos de subconsultas
